@@ -174,3 +174,9 @@ main {
     font-size: 1.6rem;
   }
 }
+
+/* ===== ADDED AS REQUESTED ===== */
+.card p {
+  font-size: 1.9rem;
+  font-weight: 800;
+}

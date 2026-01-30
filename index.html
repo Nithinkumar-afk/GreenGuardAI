@@ -5,14 +5,13 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>GreenGuard AI Dashboard</title>
 
-  <!-- Styles -->
   <link rel="stylesheet" href="style.css" />
 
-  <!-- Firebase (v9 COMPAT – v8 syntax enforced) -->
+  <!-- Firebase -->
   <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-database-compat.js"></script>
 
-  <!-- MediaPipe (used only if enabled in script.js) -->
+  <!-- MediaPipe -->
   <script src="https://cdn.jsdelivr.net/npm/@mediapipe/pose/pose.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils/camera_utils.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/@mediapipe/drawing_utils/drawing_utils.js"></script>
@@ -20,63 +19,95 @@
 
 <body>
 
-  <header>
-    <h1>🌿 GreenGuard AI</h1>
-    <p>Smart Energy, Air Quality & AI Surveillance Dashboard</p>
-  </header>
+<header>
+  <h1>🌿 GreenGuard AI</h1>
+  <p>Smart Energy, Air Quality & AI Surveillance Dashboard</p>
+</header>
 
-  <main>
+<main>
 
-    <!-- ⚡ ENERGY -->
-    <section class="card">
-      <h2>⚡ Power Consumption</h2>
-      <p id="energyValue">Loading...</p>
-      <small>Calculated from ACS712 current sensor (Watts)</small>
-    </section>
+  <!-- ⚡ ENERGY -->
+  <section class="card">
+    <h2>⚡ Power Consumption</h2>
+    <p id="energyValue">Loading...</p>
+    <small>ACS712 Sensor (Watts)</small>
+  </section>
 
-    <!-- 🌫 AIR QUALITY -->
-    <section class="card">
-      <h2>🌫 Air Quality (MQ135)</h2>
-      <p id="carbonValue">Loading...</p>
-      <small>CO₂ concentration estimate (ppm)</small>
-    </section>
+  <!-- 🌫 AIR QUALITY -->
+  <section class="card">
+    <h2>🌫 Air Quality</h2>
+    <p id="carbonValue">Loading...</p>
+    <small>MQ135 Raw Value</small>
+  </section>
 
-    <!-- 🚨 ALERTS -->
-    <section class="card">
-      <h2>🚨 Alerts</h2>
-      <ul id="alertList">
-        <li>Waiting for alerts...</li>
-      </ul>
-    </section>
+  <!-- 🌍 CO₂ -->
+  <section class="card">
+    <h2>🌍 CO₂ Emission</h2>
+    <p id="co2Live">Calculating...</p>
+    <button onclick="openCO2Popup()">📊 View Daily / Weekly</button>
+  </section>
 
-    <!-- 💡 SUGGESTIONS -->
-    <section class="card">
-      <h2>💡 Smart Suggestions</h2>
-      <ul id="suggestionList">
-        <li>Analyzing system data...</li>
-      </ul>
-    </section>
+  <!-- 🌱 TREES SAVED -->
+  <section class="card">
+    <h2>🌱 Trees Saved</h2>
+    <p><span id="treesSaved">0</span> 🌳</p>
+    <small>CO₂ offset equivalent</small>
+  </section>
 
-    <!-- 📷 AI CAMERA -->
-    <section class="card">
-      <h2>📷 AI Human Surveillance</h2>
+  <!-- 🧠 PREDICTION -->
+  <section class="card">
+    <h2>🧠 Tomorrow’s CO₂</h2>
+    <p id="predictedCO2">--</p>
+    <small>AI trend prediction</small>
+  </section>
 
-      <div class="camera-wrapper">
-        <video id="cameraStream" autoplay playsinline width="320" height="240"></video>
-        <canvas id="poseCanvas" width="320" height="240"></canvas>
-      </div>
+  <!-- 🌍 SDG -->
+  <section class="card">
+    <h2>🌍 SDG Impact</h2>
+    <p id="sdgScore">--</p>
+    <small>SDG 7 & 13</small>
+  </section>
 
-      <p id="predictionResult">AI Camera OFF</p>
+  <!-- 🏆 ECO SCORE -->
+  <section class="card">
+    <h2>🏆 Eco Score</h2>
+    <p id="ecoScore">--</p>
+    <small>Out of 100</small>
+  </section>
 
-      <button id="toggleCamera" class="camera-btn">
-        🟢 Start Camera
-      </button>
-    </section>
+  <!-- 🚨 ALERTS -->
+  <section class="card">
+    <h2>🚨 Alerts</h2>
+    <ul id="alertList"><li>No alerts</li></ul>
+  </section>
 
-  </main>
+  <!-- 💡 SUGGESTIONS -->
+  <section class="card">
+    <h2>💡 Smart Suggestions</h2>
+    <ul id="suggestionList"><li>Analyzing...</li></ul>
+  </section>
 
-  <!-- App Logic (MUST load last) -->
-  <script src="script.js"></script>
+  <!-- 📷 CAMERA -->
+  <section class="card">
+    <h2>📷 AI Surveillance</h2>
+    <video id="cameraStream" autoplay playsinline width="320" height="240"></video>
+    <canvas id="poseCanvas" width="320" height="240"></canvas>
+    <p id="predictionResult">Camera OFF</p>
+    <button id="toggleCamera">🟢 Start Camera</button>
+  </section>
 
+</main>
+
+<!-- 🌍 CO₂ POPUP -->
+<div id="co2Popup" style="display:none; position:fixed; inset:0; background:#000a;">
+  <div style="background:#fff; margin:10% auto; padding:20px; width:300px;">
+    <h3>🌍 CO₂ Summary</h3>
+    <p id="dailyCO2">Daily: --</p>
+    <p id="weeklyCO2">Weekly: --</p>
+    <button onclick="closeCO2Popup()">Close</button>
+  </div>
+</div>
+
+<script src="script.js"></script>
 </body>
 </html>
