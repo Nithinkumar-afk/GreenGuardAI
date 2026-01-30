@@ -1,5 +1,5 @@
 /*********************************
- * FIREBASE CONFIG (v8 SDK ONLY)
+ * FIREBASE CONFIG (v8 COMPAT)
  *********************************/
 const firebaseConfig = {
   apiKey: "AIzaSyCoIcDhsABqCgepD2u6LBXX3vs2VoFDw2Y",
@@ -8,61 +8,72 @@ const firebaseConfig = {
   projectId: "greenguardai-a423c",
   storageBucket: "greenguardai-a423c.appspot.com",
   messagingSenderId: "252743672688",
-  appId: "1:252743672688:web:1ca494f4b84c037311e5b5",
-  measurementId: "G-L7VZSFLMNZ"
+  appId: "1:252743672688:web:1ca494f4b84c037311e5b5"
 };
 
 firebase.initializeApp(firebaseConfig);
 const db = firebase.database();
 
 /*********************************
- * DASHBOARD DATA
+ * DASHBOARD DATA (REAL ESP32 DATA)
  *********************************/
-let energyVal = 0;
-let co2Val = 0;
+let powerVal = 0;
+let airRawVal = 0;
 
-db.ref("dashboard/energy").on("value", snap => {
-  energyVal = snap.val() ?? 0;
-  document.getElementById("energyValue").innerText = `${energyVal} W`;
+db.ref("dashboard/power").on("value", snap => {
+  powerVal = snap.val() ?? 0;
+  document.getElementById("energyValue").innerText =
+    `${powerVal.toFixed(1)} W`;
   updateSmartSuggestions();
 });
 
-db.ref("dashboard/co2").on("value", snap => {
-  co2Val = snap.val() ?? 0;
-  document.getElementById("carbonValue").innerText = `${co2Val} ppm`;
+db.ref("dashboard/air_quality_raw").on("value", snap => {
+  airRawVal = snap.val() ?? 0;
+  document.getElementById("carbonValue").innerText =
+    airRawVal.toFixed(0);
   updateSmartSuggestions();
-});
-
-db.ref("dashboard/alerts").limitToLast(5).on("value", snap => {
-  const alerts = snap.val() || {};
-  document.getElementById("alertList").innerHTML =
-    Object.values(alerts)
-      .map(a => `<li>${a.type}<br><small>${a.time}</small></li>`)
-      .join("");
 });
 
 /*********************************
- * SMART SUGGESTIONS (RULE BASED)
+ * ALERTS
+ *********************************/
+db.ref("dashboard/alerts")
+  .limitToLast(5)
+  .on("value", snap => {
+    const alerts = snap.val() || {};
+    document.getElementById("alertList").innerHTML =
+      Object.values(alerts)
+        .map(a =>
+          `<li>${a.type}<br><small>${a.time}</small></li>`
+        )
+        .join("") || "<li>No alerts</li>";
+  });
+
+/*********************************
+ * SMART SUGGESTIONS (REALISTIC)
  *********************************/
 function updateSmartSuggestions() {
   const list = document.getElementById("suggestionList");
   list.innerHTML = "";
 
-  if (energyVal > 1000) {
-    list.innerHTML += "<li>⚠ High power usage detected. Reduce load.</li>";
+  if (powerVal > 1000) {
+    list.innerHTML +=
+      "<li>⚠ High power consumption detected. Reduce load.</li>";
   }
 
-  if (co2Val > 400) {
-    list.innerHTML += "<li>⚠ CO₂ level unsafe. Improve ventilation.</li>";
+  if (airRawVal > 2000) {
+    list.innerHTML +=
+      "<li>⚠ Poor air quality trend. Ventilation recommended.</li>";
   }
 
   if (!list.innerHTML) {
-    list.innerHTML = "<li>✅ Systems operating normally</li>";
+    list.innerHTML =
+      "<li>✅ Systems operating within safe limits</li>";
   }
 }
 
 /*********************************
- * AI HUMAN DETECTION
+ * AI HUMAN DETECTION (MEDIAPIPE)
  *********************************/
 let video, canvas, ctx;
 let stream = null;
@@ -103,7 +114,7 @@ async function startAICamera() {
     document.getElementById("predictionResult").innerText =
       "AI Monitoring Active";
   } catch (e) {
-    alert("Camera access required for AI detection");
+    alert("Camera permission required");
     console.error(e);
   }
 }
@@ -111,8 +122,8 @@ async function startAICamera() {
 function stopAICamera() {
   if (stream) stream.getTracks().forEach(t => t.stop());
   cameraOn = false;
-
   ctx.clearRect(0, 0, canvas.width, canvas.height);
+
   document.getElementById("predictionResult").innerText =
     "AI Camera Off";
 }
@@ -125,7 +136,6 @@ function onPoseResults(results) {
 
   canvas.width = video.videoWidth;
   canvas.height = video.videoHeight;
-
   ctx.clearRect(0, 0, canvas.width, canvas.height);
 
   if (results.poseLandmarks) {
