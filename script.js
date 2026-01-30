@@ -1,12 +1,12 @@
 /*********************************
- * FIREBASE CONFIG
+ * FIREBASE CONFIG (v8 SDK ONLY)
  *********************************/
 const firebaseConfig = {
   apiKey: "AIzaSyCoIcDhsABqCgepD2u6LBXX3vs2VoFDw2Y",
   authDomain: "greenguardai-a423c.firebaseapp.com",
   databaseURL: "https://greenguardai-a423c-default-rtdb.asia-southeast1.firebasedatabase.app",
   projectId: "greenguardai-a423c",
-  storageBucket: "greenguardai-a423c.firebasestorage.app",
+  storageBucket: "greenguardai-a423c.appspot.com",
   messagingSenderId: "252743672688",
   appId: "1:252743672688:web:1ca494f4b84c037311e5b5",
   measurementId: "G-L7VZSFLMNZ"
@@ -21,65 +21,62 @@ const db = firebase.database();
 let energyVal = 0;
 let co2Val = 0;
 
-db.ref("dashboard/energy").on("value", (s) => {
-  energyVal = s.val() || 0;
+db.ref("dashboard/energy").on("value", snap => {
+  energyVal = snap.val() ?? 0;
   document.getElementById("energyValue").innerText = `${energyVal} W`;
   updateSmartSuggestions();
 });
 
-db.ref("dashboard/co2").on("value", (s) => {
-  co2Val = s.val() || 0;
-  document.getElementById("carbonValue").innerText = `${co2Val} kg CO₂`;
+db.ref("dashboard/co2").on("value", snap => {
+  co2Val = snap.val() ?? 0;
+  document.getElementById("carbonValue").innerText = `${co2Val} ppm`;
   updateSmartSuggestions();
 });
 
-db.ref("dashboard/alerts").on("value", (s) => {
-  const alerts = s.val() || {};
+db.ref("dashboard/alerts").limitToLast(5).on("value", snap => {
+  const alerts = snap.val() || {};
   document.getElementById("alertList").innerHTML =
     Object.values(alerts)
-      .map(a => `<li>${a.type} – <small>${a.time}</small></li>`)
+      .map(a => `<li>${a.type}<br><small>${a.time}</small></li>`)
       .join("");
 });
 
 /*********************************
- * SMART SUGGESTIONS
+ * SMART SUGGESTIONS (RULE BASED)
  *********************************/
 function updateSmartSuggestions() {
   const list = document.getElementById("suggestionList");
   list.innerHTML = "";
 
   if (energyVal > 1000) {
-    list.innerHTML += "<li>Reduce energy usage during peak hours.</li>";
+    list.innerHTML += "<li>⚠ High power usage detected. Reduce load.</li>";
   }
-  if (co2Val > 10) {
-    list.innerHTML += "<li>Check machinery for emission inefficiency.</li>";
+
+  if (co2Val > 400) {
+    list.innerHTML += "<li>⚠ CO₂ level unsafe. Improve ventilation.</li>";
   }
+
   if (!list.innerHTML) {
-    list.innerHTML = "<li>All systems optimized ✅</li>";
+    list.innerHTML = "<li>✅ Systems operating normally</li>";
   }
 }
 
 /*********************************
- * AI HUMAN DETECTION (MEDIAPIPE)
+ * AI HUMAN DETECTION
  *********************************/
-let video;
-let stream;
+let video, canvas, ctx;
+let stream = null;
 let cameraOn = false;
-let pose;
+let pose = null;
 let lastHumanAlert = 0;
-
-/* ✅ NEW: CANVAS VARIABLES */
-let canvas;
-let ctx;
 
 async function startAICamera() {
   try {
     stream = await navigator.mediaDevices.getUserMedia({ video: true });
     video.srcObject = stream;
-    cameraOn = true;
 
     pose = new Pose({
-      locateFile: (file) =>
+      locateFile: file =>
         `https://cdn.jsdelivr.net/npm/@mediapipe/pose/${file}`
     });
 
@@ -92,46 +89,39 @@ async function startAICamera() {
 
     pose.onResults(onPoseResults);
 
-    const camera = new Camera(video, {
+    const cam = new Camera(video, {
       onFrame: async () => {
-        if (cameraOn) {
-          await pose.send({ image: video });
-        }
+        if (cameraOn) await pose.send({ image: video });
       },
       width: 320,
       height: 240
     });
 
-    camera.start();
+    cameraOn = true;
+    cam.start();
 
     document.getElementById("predictionResult").innerText =
-      "AI Human Detection Running...";
-  } catch (err) {
-    alert("Camera permission denied");
-    console.error(err);
+      "AI Monitoring Active";
+  } catch (e) {
+    alert("Camera access required for AI detection");
+    console.error(e);
   }
 }
 
 function stopAICamera() {
-  if (stream) {
-    stream.getTracks().forEach(track => track.stop());
-    video.srcObject = null;
-  }
+  if (stream) stream.getTracks().forEach(t => t.stop());
   cameraOn = false;
 
-  if (ctx && canvas) {
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-  }
-
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
   document.getElementById("predictionResult").innerText =
-    "AI Camera Stopped.";
+    "AI Camera Off";
 }
 
 /*********************************
- * POSE RESULTS + DRAWING
+ * POSE PROCESSING
  *********************************/
 function onPoseResults(results) {
-  if (!cameraOn) return;
+  if (!cameraOn || !video.videoWidth) return;
 
   canvas.width = video.videoWidth;
   canvas.height = video.videoHeight;
@@ -139,31 +129,25 @@ function onPoseResults(results) {
   ctx.clearRect(0, 0, canvas.width, canvas.height);
 
   if (results.poseLandmarks) {
-    drawConnectors(
-      ctx,
-      results.poseLandmarks,
-      POSE_CONNECTIONS,
-      { color: "#00FF00", lineWidth: 3 }
-    );
+    drawConnectors(ctx, results.poseLandmarks, POSE_CONNECTIONS, {
+      color: "#00ff00",
+      lineWidth: 3
+    });
 
-    drawLandmarks(
-      ctx,
-      results.poseLandmarks,
-      { color: "#FF0000", lineWidth: 2 }
-    );
-  }
+    drawLandmarks(ctx, results.poseLandmarks, {
+      color: "#ff0000",
+      lineWidth: 2
+    });
 
-  const now = Date.now();
-
-  if (results.poseLandmarks && results.poseLandmarks.length > 0) {
-    if (now - lastHumanAlert > 8000) {
+    const now = Date.now();
+    if (now - lastHumanAlert > 15000) {
       lastHumanAlert = now;
 
       document.getElementById("predictionResult").innerText =
         "🧍 Human Detected";
 
       db.ref("dashboard/alerts").push({
-        type: "Human Detected (AI Verified)",
+        type: "Human Detected (AI)",
         time: new Date().toLocaleString()
       });
     }
@@ -181,10 +165,10 @@ function toggleCamera() {
 
   if (!cameraOn) {
     startAICamera();
-    btn.innerText = "🔴 Turn Off Camera";
+    btn.innerText = "🔴 Stop Camera";
   } else {
     stopAICamera();
-    btn.innerText = "🟢 Turn On Camera";
+    btn.innerText = "🟢 Start Camera";
   }
 }
 
@@ -193,8 +177,6 @@ function toggleCamera() {
  *********************************/
 document.addEventListener("DOMContentLoaded", () => {
   video = document.getElementById("cameraStream");
-
-  /* ✅ CANVAS INIT */
   canvas = document.getElementById("poseCanvas");
   ctx = canvas.getContext("2d");
 

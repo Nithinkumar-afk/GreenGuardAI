@@ -7,7 +7,7 @@
 
   <link rel="stylesheet" href="style.css" />
 
-  <!-- Firebase -->
+  <!-- Firebase (COMPAT for v8 syntax) -->
   <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-database-compat.js"></script>
 
@@ -21,34 +21,42 @@
 
   <header>
     <h1>🌿 GreenGuard AI</h1>
-    <p>Smart Energy, Emission & AI Surveillance Dashboard</p>
+    <p>Smart Energy, Air Quality & AI Surveillance Dashboard</p>
   </header>
 
   <main>
 
+    <!-- ⚡ ENERGY -->
     <section class="card">
-      <h2>⚡ Energy Usage</h2>
+      <h2>⚡ Power Consumption</h2>
       <p id="energyValue">Loading...</p>
+      <small>Calculated from ACS712 current sensor (Watts)</small>
     </section>
 
+    <!-- 🌫 AIR QUALITY -->
     <section class="card">
-      <h2>🌍 CO₂ Emissions</h2>
+      <h2>🌫 Air Quality (MQ135)</h2>
       <p id="carbonValue">Loading...</p>
+      <small>CO₂ concentration estimate (ppm)</small>
     </section>
 
+    <!-- 🚨 ALERTS -->
     <section class="card">
       <h2>🚨 Alerts</h2>
-      <ul id="alertList"></ul>
-    </section>
-
-    <section class="card">
-      <h2>💡 Smart Suggestions</h2>
-      <ul id="suggestionList">
-        <li>Analyzing data...</li>
+      <ul id="alertList">
+        <li>No alerts</li>
       </ul>
     </section>
 
-    <!-- ✅ UPDATED AI CAMERA SECTION -->
+    <!-- 💡 SUGGESTIONS -->
+    <section class="card">
+      <h2>💡 Smart Suggestions</h2>
+      <ul id="suggestionList">
+        <li>Analyzing system data...</li>
+      </ul>
+    </section>
+
+    <!-- 📷 AI CAMERA -->
     <section class="card">
       <h2>📷 AI Human Surveillance</h2>
 
@@ -57,7 +65,8 @@
           id="cameraStream"
           autoplay
           playsinline
-          style="width: 320px; height: 240px;"
+          width="320"
+          height="240"
         ></video>
 
         <canvas
@@ -71,7 +80,7 @@
       <p id="predictionResult">AI Camera OFF</p>
 
       <button id="toggleCamera" class="camera-btn">
-        🟢 Turn On Camera
+        🟢 Start Camera
       </button>
     </section>
 

@@ -1,16 +1,17 @@
-/* General Styles */
+/* ===== GLOBAL ===== */
 body {
   font-family: 'Segoe UI', sans-serif;
-  background: #f4f4f4;
+  background: linear-gradient(to bottom, #f6f8f7, #eef2ef);
   margin: 0;
   padding: 0;
+  color: #222;
 }
 
-/* Header */
+/* ===== HEADER ===== */
 header {
   background: #1e8f53;
   color: white;
-  padding: 1.5rem;
+  padding: 1.5rem 1rem;
   text-align: center;
 }
 
@@ -20,11 +21,12 @@ header h1 {
 }
 
 header p {
-  margin: 0.25rem 0 0;
-  font-size: 1.1rem;
+  margin-top: 0.3rem;
+  font-size: 1.05rem;
+  opacity: 0.9;
 }
 
-/* Layout */
+/* ===== LAYOUT ===== */
 main {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
@@ -32,126 +34,127 @@ main {
   padding: 1rem;
 }
 
-/* Card Style */
+/* ===== CARD ===== */
 .card {
   background: white;
-  border-radius: 12px;
+  border-radius: 14px;
   padding: 1.2rem;
-  box-shadow: 0 4px 10px rgba(0,0,0,0.08);
-  transition: transform 0.2s ease;
+  box-shadow: 0 6px 14px rgba(0,0,0,0.08);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
 
 .card:hover {
-  transform: scale(1.02);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 18px rgba(0,0,0,0.12);
 }
 
-/* Typography */
-h2 {
+/* ===== HEADINGS ===== */
+.card h2 {
   color: #1e8f53;
   margin-top: 0;
+  font-size: 1.2rem;
 }
 
-/* Video Feed (for non-AI camera) */
-video#videoFeed,
-video#cameraStream {
-  width: 100%;
-  height: 200px;
-  background: black;
-  border-radius: 10px;
-  object-fit: cover;
-  margin-bottom: 10px;
+/* ===== SENSOR VALUES ===== */
+#powerValue,
+#airQualityValue {
+  font-size: 2rem;
+  font-weight: 700;
+  margin: 0.5rem 0;
+  color: #111;
 }
 
-/* Buttons */
-.btn,
-.camera-btn {
-  padding: 10px 16px;
-  margin: 8px 5px;
-  font-size: 1rem;
-  font-weight: 600;
-  border: none;
-  border-radius: 8px;
-  background-color: #1e8f53;
-  color: white;
-  cursor: pointer;
-  transition: background 0.3s ease;
+.card small {
+  color: #666;
+  font-size: 0.85rem;
 }
 
-.btn:hover {
-  background-color: #166c3e;
-}
-
-.btn.danger {
-  background-color: #e74c3c;
-}
-
-.btn.danger:hover {
-  background-color: #c0392b;
-}
-
-.camera-btn {
-  padding: 12px 24px;
-  background: linear-gradient(45deg, #ff4b2b, #ff416c);
-  font-size: 18px;
-  border-radius: 10px;
-  transition: 0.3s;
-}
-
-.camera-btn:hover {
-  background: linear-gradient(45deg, #ff416c, #ff4b2b);
-}
-
-/* Controls Container */
-.camera-controls {
-  text-align: center;
-  margin: 20px 0 10px;
-}
-
-/* Prediction Result */
-#predictionResult {
-  font-size: 1rem;
-  margin-top: 10px;
-  font-weight: bold;
-  text-align: center;
-  color: #333;
-}
-
-/* Alert & Suggestion Lists */
+/* ===== ALERTS & SUGGESTIONS ===== */
 .card ul {
   list-style: none;
-  padding-left: 0;
-  margin-top: 10px;
+  padding: 0;
+  margin-top: 0.8rem;
 }
 
 .card ul li {
-  background: #f0f0f0;
-  padding: 8px 10px;
-  margin-bottom: 6px;
+  padding: 8px 12px;
   border-radius: 6px;
-  color: #333;
+  margin-bottom: 6px;
   font-size: 0.95rem;
 }
 
-.card ul li small {
-  color: #888;
-  font-size: 0.8rem;
+/* Alerts */
+#alertList li {
+  background: #ffecec;
+  color: #b30000;
+  font-weight: 600;
 }
 
-/* Webcam Canvas */
-canvas {
-  display: block;
-  margin: 0 auto;
-  border-radius: 10px;
-  background: black;
+/* Suggestions */
+#suggestionList li {
+  background: #eef7f1;
+  color: #1e8f53;
 }
-#cameraStream, #poseCanvas {
+
+/* ===== CAMERA ===== */
+.camera-wrapper {
+  position: relative;
+  width: 100%;
+  max-width: 360px;
+  margin: 0 auto;
+}
+
+#cameraStream,
+#poseCanvas {
   width: 100%;
   height: 240px;
   border-radius: 10px;
+  object-fit: cover;
+  background: black;
 }
 
 #poseCanvas {
   position: absolute;
-  left: 0;
   top: 0;
+  left: 0;
+}
+
+/* ===== CAMERA STATUS ===== */
+#predictionResult {
+  text-align: center;
+  font-weight: 600;
+  margin-top: 10px;
+  color: #333;
+}
+
+/* ===== BUTTONS ===== */
+.camera-btn {
+  display: block;
+  margin: 12px auto 0;
+  padding: 12px 24px;
+  font-size: 1rem;
+  font-weight: 700;
+  border: none;
+  border-radius: 10px;
+  cursor: pointer;
+  color: white;
+  background: linear-gradient(45deg, #ff4b2b, #ff416c);
+  transition: transform 0.2s ease, opacity 0.2s ease;
+}
+
+.camera-btn:hover {
+  transform: scale(1.05);
+  opacity: 0.9;
+}
+
+/* ===== MOBILE ===== */
+@media (max-width: 480px) {
+  header h1 {
+    font-size: 1.6rem;
+  }
+
+  #powerValue,
+  #airQualityValue {
+    font-size: 1.6rem;
+  }
 }
