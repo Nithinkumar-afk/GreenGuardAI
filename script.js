@@ -335,3 +335,15 @@ toggleBtn.addEventListener("click", async () => {
     ctx.clearRect(0, 0, canvasEl.width, canvasEl.height);
   }
 });
+/*********************************
+ * CO₂ POPUP CONTROLS (FIX)
+ *********************************/
+function openCO2Popup() {
+  const popup = document.getElementById("co2Popup");
+  if (popup) popup.style.display = "flex";
+}
+
+function closeCO2Popup() {
+  const popup = document.getElementById("co2Popup");
+  if (popup) popup.style.display = "none";
+}
