@@ -24,6 +24,12 @@ const POWER_ALERT_THRESHOLD = 1000;
 const CO2_INTERVAL = 60000;
 
 /*********************************
+ * CAMERA ALERT CONSTANTS (ADDED)
+ *********************************/
+const CAMERA_ALERT_TIME = 5000; // 5 seconds
+const CAMERA_ALERT_COOLDOWN = 2 * 60 * 1000; // 2 minutes
+
+/*********************************
  * LIVE STATE
  *********************************/
 let powerW = 0;
@@ -36,6 +42,13 @@ let weeklyCO2 = 0;
 let co2History = [];
 let activeMinutesToday = 0;
 let lastPowerAlert = 0;
+
+/*********************************
+ * CAMERA STATE (ADDED)
+ *********************************/
+let humanDetected = false;
+let detectionStartTime = null;
+let lastCameraAlert = 0;
 
 /*********************************
  * LOAD STORED DATA
@@ -171,6 +184,21 @@ function checkHighPowerAlert() {
 }
 
 /*********************************
+ * CAMERA ALERT (ADDED)
+ *********************************/
+function triggerCameraAlert() {
+  const now = Date.now();
+  if (now - lastCameraAlert < CAMERA_ALERT_COOLDOWN) return;
+
+  lastCameraAlert = now;
+
+  db.ref("dashboard/alerts").push({
+    type: "📷 Human detected by AI surveillance",
+    time: new Date().toLocaleString()
+  });
+}
+
+/*********************************
  * ALERT DISPLAY
  *********************************/
 db.ref("dashboard/alerts")
@@ -263,8 +291,20 @@ pose.onResults(results => {
       radius: 4
     });
 
+    if (!humanDetected) {
+      humanDetected = true;
+      detectionStartTime = Date.now();
+    }
+
+    if (Date.now() - detectionStartTime > CAMERA_ALERT_TIME) {
+      triggerCameraAlert();
+      detectionStartTime = Date.now();
+    }
+
     statusText.innerText = "🟢 Human Detected";
   } else {
+    humanDetected = false;
+    detectionStartTime = null;
     statusText.innerText = "🟡 No Human Detected";
   }
 });
