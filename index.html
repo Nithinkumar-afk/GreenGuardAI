@@ -7,7 +7,7 @@
 
   <link rel="stylesheet" href="style.css" />
 
-  <!-- Firebase -->
+  <!-- Firebase v9 compat -->
   <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-database-compat.js"></script>
 
@@ -24,7 +24,7 @@
   <p>Smart Energy, Air Quality & AI Surveillance Dashboard</p>
 </header>
 
-<main>
+<main class="dashboard">
 
   <!-- ⚡ ENERGY -->
   <section class="card">
@@ -37,17 +37,17 @@
   <section class="card">
     <h2>🌫 Air Quality</h2>
     <p id="carbonValue">Loading...</p>
-    <small>MQ135 Raw Value (Relative Index)</small>
+    <small>MQ135 Relative Index</small>
   </section>
 
   <!-- 🌍 CO₂ -->
   <section class="card">
     <h2>🌍 CO₂ Emission</h2>
     <p id="co2Live">Calculating...</p>
-    <button onclick="openCO2Popup()">📊 View Daily / Weekly</button>
+    <button class="btn" onclick="openCO2Popup()">📊 View Daily / Weekly</button>
   </section>
 
-  <!-- 🌱 TREES SAVED -->
+  <!-- 🌱 TREES -->
   <section class="card">
     <h2>🌱 Trees Saved</h2>
     <p><span id="treesSaved">0</span> 🌳</p>
@@ -58,14 +58,14 @@
   <section class="card">
     <h2>🧠 Tomorrow’s CO₂</h2>
     <p id="predictedCO2">--</p>
-    <small>AI trend prediction</small>
+    <small>Trend-based prediction</small>
   </section>
 
   <!-- 🌍 SDG -->
   <section class="card">
     <h2>🌍 SDG Impact</h2>
     <p id="sdgScore">--</p>
-    <small>SDG 7 (Energy) & SDG 13 (Climate)</small>
+    <small>SDG 7 & SDG 13</small>
   </section>
 
   <!-- 🏆 ECO SCORE -->
@@ -78,37 +78,43 @@
   <!-- 🚨 ALERTS -->
   <section class="card">
     <h2>🚨 Alerts</h2>
-    <ul id="alertList"><li>No alerts</li></ul>
+    <ul id="alertList">
+      <li>No alerts</li>
+    </ul>
   </section>
 
   <!-- 💡 SUGGESTIONS -->
   <section class="card">
     <h2>💡 Smart Suggestions</h2>
-    <ul id="suggestionList"><li>Analyzing...</li></ul>
+    <ul id="suggestionList">
+      <li>Analyzing...</li>
+    </ul>
   </section>
 
   <!-- 📷 CAMERA -->
-  <section class="card">
+  <section class="card camera-card">
     <h2>📷 AI Surveillance</h2>
 
     <div class="camera-wrapper">
-      <video id="cameraStream" autoplay playsinline></video>
+      <video id="cameraStream" autoplay muted playsinline></video>
       <canvas id="poseCanvas"></canvas>
     </div>
 
     <p id="predictionResult">Camera OFF</p>
-    <button id="toggleCamera" class="camera-btn">🟢 Start Camera</button>
+    <button id="toggleCamera" class="btn camera-btn">
+      🟢 Start Camera
+    </button>
   </section>
 
 </main>
 
 <!-- 🌍 CO₂ POPUP -->
-<div id="co2Popup" style="display:none; position:fixed; inset:0; background:#000a;">
-  <div style="background:#fff; margin:12% auto; padding:20px; width:300px; border-radius:10px;">
+<div id="co2Popup" class="popup-overlay" onclick="closeCO2Popup()">
+  <div class="popup" onclick="event.stopPropagation()">
     <h3>🌍 CO₂ Summary</h3>
     <p id="dailyCO2">Daily: --</p>
     <p id="weeklyCO2">Weekly: --</p>
-    <button onclick="closeCO2Popup()">Close</button>
+    <button class="btn" onclick="closeCO2Popup()">Close</button>
   </div>
 </div>
 

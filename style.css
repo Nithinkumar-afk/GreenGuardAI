@@ -31,7 +31,7 @@ header p {
 }
 
 /* ===== LAYOUT ===== */
-main {
+main.dashboard {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
   gap: 1rem;
@@ -59,15 +59,7 @@ main {
   margin-bottom: 0.4rem;
 }
 
-/* ===== PRIMARY METRIC TEXT ===== */
-.metric {
-  font-size: 1.9rem;
-  font-weight: 800;
-  margin: 0.4rem 0;
-  color: #111;
-}
-
-/* Explicit metrics */
+/* ===== METRICS ===== */
 #energyValue,
 #carbonValue,
 #co2Live,
@@ -98,7 +90,6 @@ main {
   line-height: 1.35;
 }
 
-/* Alerts */
 #alertList li {
   background: #fff4e5;
   color: #b35900;
@@ -106,7 +97,6 @@ main {
   border-left: 4px solid #ff9800;
 }
 
-/* Suggestions */
 #suggestionList li {
   background: #eef7f1;
   color: #1e8f53;
@@ -114,15 +104,18 @@ main {
 }
 
 /* ===== CAMERA ===== */
+.camera-card {
+  text-align: center;
+}
+
 .camera-wrapper {
   position: relative;
   width: 100%;
-  max-width: 360px;
-  margin: 0 auto;
   aspect-ratio: 4 / 3;
   border-radius: 10px;
   overflow: hidden;
   background: #000;
+  margin-top: 10px;
 }
 
 #cameraStream,
@@ -150,11 +143,12 @@ main {
   color: #333;
 }
 
-/* ===== BUTTON ===== */
+/* ===== BUTTONS ===== */
 button,
+.btn,
 .camera-btn {
-  display: block;
-  margin: 12px auto 0;
+  display: inline-block;
+  margin-top: 12px;
   padding: 12px 24px;
   font-size: 1rem;
   font-weight: 700;
@@ -167,14 +161,48 @@ button,
 }
 
 button:hover,
+.btn:hover,
 .camera-btn:hover {
   transform: scale(1.05);
   opacity: 0.9;
 }
 
 button:active,
+.btn:active,
 .camera-btn:active {
   transform: scale(0.97);
+}
+
+/* ===== POPUP ===== */
+.popup-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.6);
+  display: none;
+  align-items: center;
+  justify-content: center;
+  z-index: 999;
+}
+
+.popup {
+  background: #fff;
+  padding: 20px;
+  border-radius: 14px;
+  width: 90%;
+  max-width: 320px;
+  text-align: center;
+  animation: popupFade 0.2s ease;
+}
+
+@keyframes popupFade {
+  from {
+    transform: scale(0.9);
+    opacity: 0;
+  }
+  to {
+    transform: scale(1);
+    opacity: 1;
+  }
 }
 
 /* ===== MOBILE ===== */
@@ -192,7 +220,8 @@ button:active,
     font-size: 1.5rem;
   }
 
-  button {
+  button,
+  .btn {
     font-size: 0.9rem;
     padding: 10px 18px;
   }
