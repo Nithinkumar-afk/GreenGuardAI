@@ -17,11 +17,11 @@ const db = firebase.database();
 /*********************************
  * REAL-WORLD CONSTANTS
  *********************************/
-const CO2_FACTOR = 0.82;              // kg CO₂ per kWh (India grid)
-const TREE_CO2_YEAR = 21;             // kg CO₂ absorbed / tree / year
-const BASELINE_POWER = 800;           // W (inefficient system reference)
-const POWER_ALERT_THRESHOLD = 1000;   // W
-const CO2_INTERVAL = 60000;           // 1 minute
+const CO2_FACTOR = 0.82;
+const TREE_CO2_YEAR = 21;
+const BASELINE_POWER = 800;
+const POWER_ALERT_THRESHOLD = 1000;
+const CO2_INTERVAL = 60000;
 
 /*********************************
  * LIVE STATE
@@ -76,7 +76,7 @@ db.ref("dashboard/aqi").on("value", snap => {
 });
 
 /*********************************
- * CO₂ CALCULATION (POWER → EMISSIONS)
+ * CO₂ CALCULATION
  *********************************/
 setInterval(() => {
   if (powerW <= 0) return;
@@ -90,7 +90,7 @@ setInterval(() => {
   weeklyCO2 += co2;
 
   co2History.push(co2);
-  if (co2History.length > 1440) co2History.shift(); // 1 day history
+  if (co2History.length > 1440) co2History.shift();
 
   db.ref("dashboard/co2").set({
     daily: Number(dailyCO2.toFixed(4)),
@@ -105,8 +105,6 @@ setInterval(() => {
  * DASHBOARD CORE LOGIC
  *********************************/
 function renderDashboard() {
-
-  /* 🌍 LIVE CO₂ */
   document.getElementById("co2Live").innerText =
     `${dailyCO2.toFixed(2)} kg today`;
 
@@ -116,7 +114,6 @@ function renderDashboard() {
   document.getElementById("weeklyCO2").innerText =
     `Weekly: ${weeklyCO2.toFixed(2)} kg`;
 
-  /* 🌱 TREES SAVED (REAL LOGIC) */
   const baselineCO2 =
     ((BASELINE_POWER / 1000) * (activeMinutesToday / 60)) * CO2_FACTOR;
 
@@ -126,7 +123,6 @@ function renderDashboard() {
   document.getElementById("treesSaved").innerText =
     treesSaved.toFixed(2);
 
-  /* 🧠 NEXT-DAY CO₂ PREDICTION */
   const avgMinuteCO2 =
     co2History.length
       ? co2History.reduce((a, b) => a + b, 0) / co2History.length
@@ -136,7 +132,6 @@ function renderDashboard() {
   document.getElementById("predictedCO2").innerText =
     `${predictedTomorrow.toFixed(2)} kg`;
 
-  /* 🏆 ECO SCORE (STRICT) */
   let eco = 100;
   eco -= Math.min(40, powerW / 25);
   eco -= Math.min(30, aqi / 8);
@@ -146,7 +141,6 @@ function renderDashboard() {
   document.getElementById("ecoScore").innerText =
     `${eco}/100`;
 
-  /* 🌍 SDG SCORE (SDG-13 / SDG-7) */
   const sdgScore = Math.max(
     0,
     Math.min(100, Math.round((eco * 0.75) + (100 - dailyCO2 * 12)))
@@ -227,3 +221,73 @@ function openCO2Popup() {
 function closeCO2Popup() {
   document.getElementById("co2Popup").style.display = "none";
 }
+
+/*********************************
+ * AI CAMERA + POSE DETECTION
+ *********************************/
+const videoEl = document.getElementById("cameraStream");
+const canvasEl = document.getElementById("poseCanvas");
+const ctx = canvasEl.getContext("2d");
+const toggleBtn = document.getElementById("toggleCamera");
+const statusText = document.getElementById("predictionResult");
+
+let camera = null;
+let cameraRunning = false;
+
+const pose = new Pose({
+  locateFile: file =>
+    `https://cdn.jsdelivr.net/npm/@mediapipe/pose/${file}`
+});
+
+pose.setOptions({
+  modelComplexity: 1,
+  smoothLandmarks: true,
+  enableSegmentation: false,
+  minDetectionConfidence: 0.5,
+  minTrackingConfidence: 0.5
+});
+
+pose.onResults(results => {
+  canvasEl.width = videoEl.videoWidth;
+  canvasEl.height = videoEl.videoHeight;
+  ctx.clearRect(0, 0, canvasEl.width, canvasEl.height);
+
+  if (results.poseLandmarks) {
+    drawConnectors(ctx, results.poseLandmarks, POSE_CONNECTIONS, {
+      color: "#00ff99",
+      lineWidth: 3
+    });
+
+    drawLandmarks(ctx, results.poseLandmarks, {
+      color: "#ff0033",
+      radius: 4
+    });
+
+    statusText.innerText = "🟢 Human Detected";
+  } else {
+    statusText.innerText = "🟡 No Human Detected";
+  }
+});
+
+toggleBtn.addEventListener("click", async () => {
+  if (!cameraRunning) {
+    camera = new Camera(videoEl, {
+      onFrame: async () => {
+        await pose.send({ image: videoEl });
+      },
+      width: 640,
+      height: 480
+    });
+
+    await camera.start();
+    cameraRunning = true;
+    toggleBtn.innerText = "🔴 Stop Camera";
+    statusText.innerText = "🟢 Camera ON";
+  } else {
+    camera.stop();
+    cameraRunning = false;
+    toggleBtn.innerText = "🟢 Start Camera";
+    statusText.innerText = "Camera OFF";
+    ctx.clearRect(0, 0, canvasEl.width, canvasEl.height);
+  }
+});
