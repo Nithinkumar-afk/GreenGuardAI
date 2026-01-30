@@ -24,10 +24,10 @@ const POWER_ALERT_THRESHOLD = 1000;
 const CO2_INTERVAL = 60000;
 
 /*********************************
- * CAMERA ALERT CONSTANTS (ADDED)
+ * CAMERA ALERT CONSTANTS
  *********************************/
-const CAMERA_ALERT_TIME = 5000; // 5 seconds
-const CAMERA_ALERT_COOLDOWN = 2 * 60 * 1000; // 2 minutes
+const CAMERA_ALERT_TIME = 5000;
+const CAMERA_ALERT_COOLDOWN = 2 * 60 * 1000;
 
 /*********************************
  * LIVE STATE
@@ -44,7 +44,7 @@ let activeMinutesToday = 0;
 let lastPowerAlert = 0;
 
 /*********************************
- * CAMERA STATE (ADDED)
+ * CAMERA STATE
  *********************************/
 let humanDetected = false;
 let detectionStartTime = null;
@@ -61,7 +61,7 @@ db.ref("dashboard/co2").once("value", snap => {
 });
 
 /*********************************
- * POWER INPUT (ESP32)
+ * POWER INPUT
  *********************************/
 db.ref("dashboard/power").on("value", snap => {
   powerW = Number(snap.val()) || 0;
@@ -80,7 +80,7 @@ db.ref("dashboard/current").on("value", snap => {
 });
 
 /*********************************
- * AIR QUALITY (MQ135)
+ * AIR QUALITY
  *********************************/
 db.ref("dashboard/aqi").on("value", snap => {
   aqi = Number(snap.val()) || 0;
@@ -184,7 +184,7 @@ function checkHighPowerAlert() {
 }
 
 /*********************************
- * CAMERA ALERT (ADDED)
+ * CAMERA ALERT
  *********************************/
 function triggerCameraAlert() {
   const now = Date.now();
@@ -241,16 +241,6 @@ function updateSmartSuggestions() {
 }
 
 /*********************************
- * CO₂ POPUP CONTROLS
- *********************************/
-function openCO2Popup() {
-  document.getElementById("co2Popup").style.display = "block";
-}
-function closeCO2Popup() {
-  document.getElementById("co2Popup").style.display = "none";
-}
-
-/*********************************
  * AI CAMERA + POSE DETECTION
  *********************************/
 const videoEl = document.getElementById("cameraStream");
@@ -275,6 +265,9 @@ pose.setOptions({
   minTrackingConfidence: 0.5
 });
 
+/*********************************
+ * ✅ FIXED + STABLE POSE HANDLER
+ *********************************/
 pose.onResults(results => {
   canvasEl.width = videoEl.videoWidth;
   canvasEl.height = videoEl.videoHeight;
@@ -291,24 +284,35 @@ pose.onResults(results => {
       radius: 4
     });
 
+    // start timer ONLY once
     if (!humanDetected) {
       humanDetected = true;
       detectionStartTime = Date.now();
     }
 
-    if (Date.now() - detectionStartTime > CAMERA_ALERT_TIME) {
+    // trigger after continuous presence
+    if (
+      detectionStartTime &&
+      Date.now() - detectionStartTime >= CAMERA_ALERT_TIME
+    ) {
       triggerCameraAlert();
-      detectionStartTime = Date.now();
+
+      // lock until person leaves frame
+      detectionStartTime = null;
     }
 
     statusText.innerText = "🟢 Human Detected";
   } else {
+    // reset completely when human leaves
     humanDetected = false;
     detectionStartTime = null;
     statusText.innerText = "🟡 No Human Detected";
   }
 });
 
+/*********************************
+ * CAMERA TOGGLE
+ *********************************/
 toggleBtn.addEventListener("click", async () => {
   if (!cameraRunning) {
     camera = new Camera(videoEl, {
