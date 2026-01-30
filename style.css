@@ -1,6 +1,6 @@
 /* ===== GLOBAL ===== */
 body {
-  font-family: "Segoe UI", sans-serif;
+  font-family: "Segoe UI", system-ui, sans-serif;
   background: linear-gradient(to bottom, #f6f8f7, #eef2ef);
   margin: 0;
   padding: 0;
@@ -10,7 +10,7 @@ body {
 /* ===== HEADER ===== */
 header {
   background: #1e8f53;
-  color: white;
+  color: #fff;
   padding: 1.5rem 1rem;
   text-align: center;
 }
@@ -36,7 +36,7 @@ main {
 
 /* ===== CARD ===== */
 .card {
-  background: white;
+  background: #fff;
   border-radius: 14px;
   padding: 1.2rem;
   box-shadow: 0 6px 14px rgba(0, 0, 0, 0.08);
@@ -81,42 +81,50 @@ main {
   border-radius: 6px;
   margin-bottom: 6px;
   font-size: 0.95rem;
+  line-height: 1.3;
 }
 
-/* Alerts – serious but not panic */
+/* Alerts */
 #alertList li {
   background: #fff4e5;
   color: #b35900;
   font-weight: 600;
+  border-left: 4px solid #ff9800;
 }
 
 /* Suggestions */
 #suggestionList li {
   background: #eef7f1;
   color: #1e8f53;
+  border-left: 4px solid #1e8f53;
 }
 
 /* ===== CAMERA ===== */
 .camera-wrapper {
   position: relative;
-  width: 100%;
-  max-width: 360px;
-  margin: 0 auto;
-}
-
-#cameraStream,
-#poseCanvas {
-  width: 100%;
+  width: 320px;
   height: 240px;
+  margin: 0 auto;
   border-radius: 10px;
-  object-fit: cover;
-  background: black;
+  overflow: hidden;
+  background: #000;
 }
 
+#cameraStream {
+  width: 320px;
+  height: 240px;
+  object-fit: cover;
+  display: block;
+}
+
+/* IMPORTANT: Canvas must NOT be scaled */
 #poseCanvas {
   position: absolute;
   top: 0;
   left: 0;
+  width: 320px;
+  height: 240px;
+  pointer-events: none;
 }
 
 /* ===== CAMERA STATUS ===== */
@@ -137,14 +145,18 @@ main {
   border: none;
   border-radius: 10px;
   cursor: pointer;
-  color: white;
+  color: #fff;
   background: linear-gradient(45deg, #ff4b2b, #ff416c);
-  transition: transform 0.2s ease, opacity 0.2s ease;
+  transition: transform 0.15s ease, opacity 0.15s ease;
 }
 
 .camera-btn:hover {
   transform: scale(1.05);
   opacity: 0.9;
+}
+
+.camera-btn:active {
+  transform: scale(0.97);
 }
 
 /* ===== MOBILE ===== */
@@ -158,8 +170,14 @@ main {
     font-size: 1.6rem;
   }
 
+  .camera-wrapper {
+    width: 100%;
+    height: 200px;
+  }
+
   #cameraStream,
   #poseCanvas {
+    width: 100%;
     height: 200px;
   }
 }

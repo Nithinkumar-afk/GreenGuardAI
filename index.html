@@ -5,9 +5,10 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>GreenGuard AI Dashboard</title>
 
+  <!-- Styles -->
   <link rel="stylesheet" href="style.css" />
 
-  <!-- Firebase (COMPAT for v8 syntax) -->
+  <!-- Firebase (v9 COMPAT for v8-style syntax) -->
   <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-database-compat.js"></script>
 
@@ -60,20 +61,20 @@
     <section class="card">
       <h2>📷 AI Human Surveillance</h2>
 
-      <div style="position: relative; width: 320px; height: 240px;">
+      <div class="camera-wrapper">
         <video
           id="cameraStream"
           autoplay
           playsinline
           width="320"
           height="240"
+          aria-label="Live AI camera feed"
         ></video>
 
         <canvas
           id="poseCanvas"
           width="320"
           height="240"
-          style="position:absolute; top:0; left:0;"
         ></canvas>
       </div>
 
@@ -86,6 +87,8 @@
 
   </main>
 
+  <!-- App Logic -->
   <script src="script.js"></script>
+
 </body>
 </html>
