@@ -37,7 +37,7 @@
   <section class="card">
     <h2>🌫 Air Quality</h2>
     <p id="carbonValue">Loading...</p>
-    <small>MQ135 Raw Value</small>
+    <small>MQ135 Raw Value (Relative Index)</small>
   </section>
 
   <!-- 🌍 CO₂ -->
@@ -65,7 +65,7 @@
   <section class="card">
     <h2>🌍 SDG Impact</h2>
     <p id="sdgScore">--</p>
-    <small>SDG 7 & 13</small>
+    <small>SDG 7 (Energy) & SDG 13 (Climate)</small>
   </section>
 
   <!-- 🏆 ECO SCORE -->
@@ -90,17 +90,21 @@
   <!-- 📷 CAMERA -->
   <section class="card">
     <h2>📷 AI Surveillance</h2>
-    <video id="cameraStream" autoplay playsinline width="320" height="240"></video>
-    <canvas id="poseCanvas" width="320" height="240"></canvas>
+
+    <div class="camera-wrapper">
+      <video id="cameraStream" autoplay playsinline></video>
+      <canvas id="poseCanvas"></canvas>
+    </div>
+
     <p id="predictionResult">Camera OFF</p>
-    <button id="toggleCamera">🟢 Start Camera</button>
+    <button id="toggleCamera" class="camera-btn">🟢 Start Camera</button>
   </section>
 
 </main>
 
 <!-- 🌍 CO₂ POPUP -->
 <div id="co2Popup" style="display:none; position:fixed; inset:0; background:#000a;">
-  <div style="background:#fff; margin:10% auto; padding:20px; width:300px;">
+  <div style="background:#fff; margin:12% auto; padding:20px; width:300px; border-radius:10px;">
     <h3>🌍 CO₂ Summary</h3>
     <p id="dailyCO2">Daily: --</p>
     <p id="weeklyCO2">Weekly: --</p>
