@@ -1,5 +1,5 @@
 /*********************************
- * FIREBASE CONFIG (v8)
+ * FIREBASE CONFIG (v8 COMPAT)
  *********************************/
 const firebaseConfig = {
   apiKey: "AIzaSyCoIcDhsABqCgepD2u6LBXX3vs2VoFDw2Y",
@@ -15,19 +15,20 @@ firebase.initializeApp(firebaseConfig);
 const db = firebase.database();
 
 /*********************************
- * CONSTANTS (REALISTIC)
+ * CONSTANTS (REAL WORLD)
  *********************************/
-const CO2_FACTOR = 0.82;          // kg CO₂ / kWh (India avg)
-const TREE_CO2_YEAR = 21;         // kg CO₂ absorbed per tree per year
-const BASELINE_POWER = 800;       // W
+const CO2_FACTOR = 0.82;            // kg CO₂ / kWh (India)
+const TREE_CO2_YEAR = 21;           // kg CO₂ per tree per year
+const BASELINE_POWER = 800;         // W (inefficient reference)
 const POWER_ALERT_THRESHOLD = 1000;
-const CO2_INTERVAL = 60000;       // 1 min
+const CO2_INTERVAL = 60000;         // 1 min
 
 /*********************************
- * STATE
+ * STATE (MATCHES ESP32)
  *********************************/
-let energyVal = 0;
-let airRawVal = 0;
+let powerW = 0;     // from /dashboard/power
+let currentA = 0;   // from /dashboard/current
+let aqi = 0;        // from /dashboard/aqi
 
 let dailyCO2 = 0;
 let weeklyCO2 = 0;
@@ -47,37 +48,44 @@ db.ref("dashboard/co2").once("value", snap => {
 });
 
 /*********************************
- * ENERGY INPUT
+ * POWER (W) — ESP32
  *********************************/
-db.ref("dashboard/energy").on("value", snap => {
-  energyVal = Number(snap.val()) || 0;
+db.ref("dashboard/power").on("value", snap => {
+  powerW = Number(snap.val()) || 0;
   document.getElementById("energyValue").innerText =
-    `${energyVal.toFixed(1)} W`;
+    `${powerW.toFixed(1)} W`;
 
   checkHighPowerAlert();
   renderDashboard();
 });
 
 /*********************************
- * AIR QUALITY (RELATIVE INDEX)
+ * CURRENT (A) — ESP32
  *********************************/
-db.ref("dashboard/air_quality_raw").on("value", snap => {
-  airRawVal = Number(snap.val()) || 0;
+db.ref("dashboard/current").on("value", snap => {
+  currentA = Number(snap.val()) || 0;
+});
+
+/*********************************
+ * AQI — ESP32 (REAL AIR QUALITY)
+ *********************************/
+db.ref("dashboard/aqi").on("value", snap => {
+  aqi = Number(snap.val()) || 0;
   document.getElementById("carbonValue").innerText =
-    airRawVal.toFixed(2);
+    aqi;
 
   renderDashboard();
 });
 
 /*********************************
- * CO₂ ACCUMULATION
+ * CO₂ ACCUMULATION (FROM REAL POWER)
  *********************************/
 setInterval(() => {
-  if (energyVal <= 0) return;
+  if (powerW <= 0) return;
 
   activeMinutesToday++;
 
-  const kWh = (energyVal / 1000) * (1 / 60);
+  const kWh = (powerW / 1000) * (1 / 60);
   const co2 = kWh * CO2_FACTOR;
 
   dailyCO2 += co2;
@@ -95,7 +103,7 @@ setInterval(() => {
 }, CO2_INTERVAL);
 
 /*********************************
- * DASHBOARD LOGIC
+ * DASHBOARD INTELLIGENCE
  *********************************/
 function renderDashboard() {
 
@@ -109,7 +117,7 @@ function renderDashboard() {
   document.getElementById("weeklyCO2").innerText =
     `Weekly: ${weeklyCO2.toFixed(2)} kg`;
 
-  /* 🌱 TREES SAVED (REALISTIC) */
+  /* 🌱 TREES SAVED (VS BASELINE) */
   const baselineCO2 =
     ((BASELINE_POWER / 1000) * (activeMinutesToday / 60)) * CO2_FACTOR;
 
@@ -120,22 +128,21 @@ function renderDashboard() {
   document.getElementById("treesSaved").innerText =
     treesSaved.toFixed(2);
 
-  /* 🧠 NEXT DAY PREDICTION */
+  /* 🧠 TOMORROW PREDICTION */
   const avgMinuteCO2 =
-    co2History.length > 10
+    co2History.length
       ? co2History.reduce((a, b) => a + b, 0) / co2History.length
       : 0;
 
   const predictedTomorrow = avgMinuteCO2 * 1440;
-
   document.getElementById("predictedCO2").innerText =
     `${predictedTomorrow.toFixed(2)} kg`;
 
-  /* 🏆 ECO SCORE (0–100) */
+  /* 🏆 ECO SCORE (HARD LOGIC) */
   let eco = 100;
-  eco -= Math.min(30, energyVal / 35);
-  eco -= Math.min(25, airRawVal * 6); // relative pollution index
-  eco -= Math.min(25, dailyCO2 * 4);
+  eco -= Math.min(35, powerW / 30);
+  eco -= Math.min(35, aqi / 10);
+  eco -= Math.min(30, dailyCO2 * 4);
 
   eco = Math.max(0, Math.round(eco));
   document.getElementById("ecoScore").innerText =
@@ -143,7 +150,7 @@ function renderDashboard() {
 
   /* 🌍 SDG SCORE */
   const sdgScore =
-    Math.max(0, Math.round((eco * 0.6) + (100 - dailyCO2 * 8)));
+    Math.max(0, Math.round((eco * 0.7) + (100 - dailyCO2 * 10)));
 
   document.getElementById("sdgScore").innerText =
     `${sdgScore}/100`;
@@ -157,7 +164,7 @@ function renderDashboard() {
 function checkHighPowerAlert() {
   const now = Date.now();
   if (
-    energyVal > POWER_ALERT_THRESHOLD &&
+    powerW > POWER_ALERT_THRESHOLD &&
     now - lastPowerAlert > 10 * 60 * 1000
   ) {
     lastPowerAlert = now;
@@ -196,11 +203,11 @@ function updateSmartSuggestions() {
   const list = document.getElementById("suggestionList");
   list.innerHTML = "";
 
-  if (energyVal > POWER_ALERT_THRESHOLD)
-    list.innerHTML += "<li>⚠ Reduce electrical load to cut CO₂</li>";
+  if (powerW > POWER_ALERT_THRESHOLD)
+    list.innerHTML += "<li>⚠ High power → higher CO₂ emissions</li>";
 
-  if (airRawVal > 2.5)
-    list.innerHTML += "<li>⚠ Improve ventilation / reduce pollutants</li>";
+  if (aqi > 150)
+    list.innerHTML += "<li>⚠ Poor air quality detected</li>";
 
   if (!list.innerHTML)
     list.innerHTML = "<li>✅ System operating sustainably</li>";
@@ -215,20 +222,3 @@ function openCO2Popup() {
 function closeCO2Popup() {
   document.getElementById("co2Popup").style.display = "none";
 }
-
-/*********************************
- * AI CAMERA (UNCHANGED)
- *********************************/
-let video, canvas, ctx;
-let cameraOn = false;
-
-document.addEventListener("DOMContentLoaded", () => {
-  video = document.getElementById("cameraStream");
-  canvas = document.getElementById("poseCanvas");
-  ctx = canvas.getContext("2d");
-
-  document.getElementById("toggleCamera")
-    .addEventListener("click", () =>
-      cameraOn ? stopAICamera() : startAICamera()
-    );
-});
