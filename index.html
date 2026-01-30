@@ -5,13 +5,14 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>GreenGuard AI Dashboard</title>
 
+  <!-- Styles -->
   <link rel="stylesheet" href="style.css" />
 
-  <!-- Firebase v9 compat -->
+  <!-- Firebase v9 (compat for v8-style code) -->
   <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-database-compat.js"></script>
 
-  <!-- MediaPipe -->
+  <!-- MediaPipe Pose -->
   <script src="https://cdn.jsdelivr.net/npm/@mediapipe/pose/pose.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils/camera_utils.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/@mediapipe/drawing_utils/drawing_utils.js"></script>
@@ -101,6 +102,7 @@
     </div>
 
     <p id="predictionResult">Camera OFF</p>
+
     <button id="toggleCamera" class="btn camera-btn">
       🟢 Start Camera
     </button>
@@ -109,8 +111,8 @@
 </main>
 
 <!-- 🌍 CO₂ POPUP -->
-<div id="co2Popup" class="popup-overlay" onclick="closeCO2Popup()">
-  <div class="popup" onclick="event.stopPropagation()">
+<div id="co2Popup" class="popup-overlay" style="display:none;">
+  <div class="popup">
     <h3>🌍 CO₂ Summary</h3>
     <p id="dailyCO2">Daily: --</p>
     <p id="weeklyCO2">Weekly: --</p>
@@ -118,6 +120,8 @@
   </div>
 </div>
 
+<!-- Main Script -->
 <script src="script.js"></script>
+
 </body>
 </html>
