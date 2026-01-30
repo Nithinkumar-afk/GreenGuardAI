@@ -4,7 +4,8 @@
 const firebaseConfig = {
   apiKey: "AIzaSyCoIcDhsABqCgepD2u6LBXX3vs2VoFDw2Y",
   authDomain: "greenguardai-a423c.firebaseapp.com",
-  databaseURL: "https://greenguardai-a423c-default-rtdb.asia-southeast1.firebasedatabase.app",
+  databaseURL:
+    "https://greenguardai-a423c-default-rtdb.asia-southeast1.firebasedatabase.app",
   projectId: "greenguardai-a423c",
   storageBucket: "greenguardai-a423c.appspot.com",
   messagingSenderId: "252743672688",
@@ -17,18 +18,22 @@ const db = firebase.database();
 /*********************************
  * DASHBOARD DATA
  *********************************/
-let powerVal = 0;
+let energyVal = 0;
 let airRawVal = 0;
 
-db.ref("dashboard/power").on("value", snap => {
-  powerVal = snap.val() ?? 0;
-  document.getElementById("energyValue").innerText = `${powerVal.toFixed(1)} W`;
+// ENERGY (correct key)
+db.ref("dashboard/energy").on("value", snap => {
+  energyVal = Number(snap.val()) || 0;
+  document.getElementById("energyValue").innerText =
+    `${energyVal.toFixed(1)} W`;
   updateSmartSuggestions();
 });
 
+// AIR QUALITY
 db.ref("dashboard/air_quality_raw").on("value", snap => {
-  airRawVal = snap.val() ?? 0;
-  document.getElementById("carbonValue").innerText = airRawVal.toFixed(0);
+  airRawVal = Number(snap.val()) || 0;
+  document.getElementById("carbonValue").innerText =
+    airRawVal.toFixed(2);
   updateSmartSuggestions();
 });
 
@@ -38,11 +43,20 @@ db.ref("dashboard/air_quality_raw").on("value", snap => {
 db.ref("dashboard/alerts")
   .limitToLast(5)
   .on("value", snap => {
-    const alerts = snap.val() || {};
-    document.getElementById("alertList").innerHTML =
-      Object.values(alerts)
-        .map(a => `<li>${a.type}<br><small>${a.time}</small></li>`)
-        .join("") || "<li>No alerts</li>";
+    const list = document.getElementById("alertList");
+    list.innerHTML = "";
+
+    const alerts = snap.val();
+    if (!alerts) {
+      list.innerHTML = "<li>No alerts</li>";
+      return;
+    }
+
+    Object.values(alerts).reverse().forEach(a => {
+      const li = document.createElement("li");
+      li.innerHTML = `${a.type}<br><small>${a.time}</small>`;
+      list.appendChild(li);
+    });
   });
 
 /*********************************
@@ -52,72 +66,55 @@ function updateSmartSuggestions() {
   const list = document.getElementById("suggestionList");
   list.innerHTML = "";
 
-  if (powerVal > 1000)
-    list.innerHTML += "<li>⚠ High power usage detected</li>";
+  if (energyVal > 1000)
+    list.innerHTML += "<li>⚠ Reduce power usage</li>";
 
-  if (airRawVal > 2000)
-    list.innerHTML += "<li>⚠ Poor air quality detected</li>";
+  if (airRawVal > 2.5)
+    list.innerHTML += "<li>⚠ Improve ventilation</li>";
 
   if (!list.innerHTML)
     list.innerHTML = "<li>✅ All systems normal</li>";
 }
 
 /*********************************
- * AI CAMERA VARIABLES
+ * AI CAMERA
  *********************************/
 let video, canvas, ctx;
-let stream = null;
 let cameraOn = false;
-let pose = null;
-let mpCamera = null;
-let lastHumanAlert = 0;
+let pose, mpCamera;
+let lastHumanDetected = 0;
 
-/*********************************
- * START AI CAMERA
- *********************************/
 async function startAICamera() {
-  try {
-    stream = await navigator.mediaDevices.getUserMedia({ video: true });
-    video.srcObject = stream;
-    await video.play();
+  cameraOn = true;
 
-    pose = new Pose({
-      locateFile: file =>
-        `https://cdn.jsdelivr.net/npm/@mediapipe/pose/${file}`
-    });
+  pose = new Pose({
+    locateFile: file =>
+      `https://cdn.jsdelivr.net/npm/@mediapipe/pose/${file}`
+  });
 
-    pose.setOptions({
-      modelComplexity: 1,
-      smoothLandmarks: true,
-      minDetectionConfidence: 0.6,
-      minTrackingConfidence: 0.6
-    });
+  pose.setOptions({
+    modelComplexity: 1,
+    smoothLandmarks: true,
+    minDetectionConfidence: 0.6,
+    minTrackingConfidence: 0.6
+  });
 
-    pose.onResults(onPoseResults);
+  pose.onResults(onPoseResults);
 
-    mpCamera = new Camera(video, {
-      onFrame: async () => {
-        if (cameraOn) await pose.send({ image: video });
-      },
-      width: 320,
-      height: 240
-    });
+  mpCamera = new Camera(video, {
+    onFrame: async () => {
+      if (cameraOn) await pose.send({ image: video });
+    },
+    width: 640,
+    height: 480
+  });
 
-    cameraOn = true;
-    mpCamera.start();
+  await mpCamera.start();
 
-    document.getElementById("predictionResult").innerText =
-      "AI Monitoring Active";
-
-  } catch (err) {
-    alert("Camera access denied");
-    console.error(err);
-  }
+  document.getElementById("predictionResult").innerText =
+    "AI Monitoring Active";
 }
 
-/*********************************
- * STOP AI CAMERA
- *********************************/
 function stopAICamera() {
   cameraOn = false;
 
@@ -126,13 +123,7 @@ function stopAICamera() {
     mpCamera = null;
   }
 
-  if (stream) {
-    stream.getTracks().forEach(t => t.stop());
-    stream = null;
-  }
-
-  if (ctx)
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
 
   document.getElementById("predictionResult").innerText =
     "AI Camera Off";
@@ -142,10 +133,8 @@ function stopAICamera() {
  * POSE RESULTS
  *********************************/
 function onPoseResults(results) {
-  if (!cameraOn || !results.image || !ctx) return;
+  if (!cameraOn) return;
 
-  canvas.width = results.image.width;
-  canvas.height = results.image.height;
   ctx.clearRect(0, 0, canvas.width, canvas.height);
 
   if (results.poseLandmarks) {
@@ -160,8 +149,8 @@ function onPoseResults(results) {
     });
 
     const now = Date.now();
-    if (now - lastHumanAlert > 15000) {
-      lastHumanAlert = now;
+    if (now - lastHumanDetected > 30000) {
+      lastHumanDetected = now;
 
       document.getElementById("predictionResult").innerText =
         "🧍 Human Detected";
@@ -188,7 +177,7 @@ function toggleCamera() {
     btn.innerText = "🔴 Stop Camera";
   } else {
     stopAICamera();
-    btn.innerText = "🟢 Turn On Camera";
+    btn.innerText = "🟢 Start Camera";
   }
 }
 

@@ -8,11 +8,11 @@
   <!-- Styles -->
   <link rel="stylesheet" href="style.css" />
 
-  <!-- Firebase (v9 COMPAT for v8-style syntax) -->
+  <!-- Firebase (v9 COMPAT – v8 syntax enforced) -->
   <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-database-compat.js"></script>
 
-  <!-- MediaPipe Pose -->
+  <!-- MediaPipe (used only if enabled in script.js) -->
   <script src="https://cdn.jsdelivr.net/npm/@mediapipe/pose/pose.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils/camera_utils.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/@mediapipe/drawing_utils/drawing_utils.js"></script>
@@ -45,7 +45,7 @@
     <section class="card">
       <h2>🚨 Alerts</h2>
       <ul id="alertList">
-        <li>No alerts</li>
+        <li>Waiting for alerts...</li>
       </ul>
     </section>
 
@@ -62,20 +62,8 @@
       <h2>📷 AI Human Surveillance</h2>
 
       <div class="camera-wrapper">
-        <video
-          id="cameraStream"
-          autoplay
-          playsinline
-          width="320"
-          height="240"
-          aria-label="Live AI camera feed"
-        ></video>
-
-        <canvas
-          id="poseCanvas"
-          width="320"
-          height="240"
-        ></canvas>
+        <video id="cameraStream" autoplay playsinline width="320" height="240"></video>
+        <canvas id="poseCanvas" width="320" height="240"></canvas>
       </div>
 
       <p id="predictionResult">AI Camera OFF</p>
@@ -87,7 +75,7 @@
 
   </main>
 
-  <!-- App Logic -->
+  <!-- App Logic (MUST load last) -->
   <script src="script.js"></script>
 
 </body>
