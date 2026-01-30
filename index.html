@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>GreenGuard AI Dashboard</title>
+
+  <link rel="stylesheet" href="style.css" />
+
+  <!-- Firebase -->
+  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-database-compat.js"></script>
+
+  <!-- MediaPipe Pose -->
+  <script src="https://cdn.jsdelivr.net/npm/@mediapipe/pose/pose.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils/camera_utils.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@mediapipe/drawing_utils/drawing_utils.js"></script>
+</head>
+
+<body>
+
+  <header>
+    <h1>🌿 GreenGuard AI</h1>
+    <p>Smart Energy, Emission & AI Surveillance Dashboard</p>
+  </header>
+
+  <main>
+
+    <section class="card">
+      <h2>⚡ Energy Usage</h2>
+      <p id="energyValue">Loading...</p>
+    </section>
+
+    <section class="card">
+      <h2>🌍 CO₂ Emissions</h2>
+      <p id="carbonValue">Loading...</p>
+    </section>
+
+    <section class="card">
+      <h2>🚨 Alerts</h2>
+      <ul id="alertList"></ul>
+    </section>
+
+    <section class="card">
+      <h2>💡 Smart Suggestions</h2>
+      <ul id="suggestionList">
+        <li>Analyzing data...</li>
+      </ul>
+    </section>
+
+    <!-- ✅ UPDATED AI CAMERA SECTION -->
+    <section class="card">
+      <h2>📷 AI Human Surveillance</h2>
+
+      <div style="position: relative; width: 320px; height: 240px;">
+        <video
+          id="cameraStream"
+          autoplay
+          playsinline
+          style="width: 320px; height: 240px;"
+        ></video>
+
+        <canvas
+          id="poseCanvas"
+          width="320"
+          height="240"
+          style="position:absolute; top:0; left:0;"
+        ></canvas>
+      </div>
+
+      <p id="predictionResult">AI Camera OFF</p>
+
+      <button id="toggleCamera" class="camera-btn">
+        🟢 Turn On Camera
+      </button>
+    </section>
+
+  </main>
+
+  <script src="script.js"></script>
+</body>
+</html>

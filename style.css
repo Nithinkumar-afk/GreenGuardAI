@@ -1,0 +1,157 @@
+/* General Styles */
+body {
+  font-family: 'Segoe UI', sans-serif;
+  background: #f4f4f4;
+  margin: 0;
+  padding: 0;
+}
+
+/* Header */
+header {
+  background: #1e8f53;
+  color: white;
+  padding: 1.5rem;
+  text-align: center;
+}
+
+header h1 {
+  margin: 0;
+  font-size: 2rem;
+}
+
+header p {
+  margin: 0.25rem 0 0;
+  font-size: 1.1rem;
+}
+
+/* Layout */
+main {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 1rem;
+  padding: 1rem;
+}
+
+/* Card Style */
+.card {
+  background: white;
+  border-radius: 12px;
+  padding: 1.2rem;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.08);
+  transition: transform 0.2s ease;
+}
+
+.card:hover {
+  transform: scale(1.02);
+}
+
+/* Typography */
+h2 {
+  color: #1e8f53;
+  margin-top: 0;
+}
+
+/* Video Feed (for non-AI camera) */
+video#videoFeed,
+video#cameraStream {
+  width: 100%;
+  height: 200px;
+  background: black;
+  border-radius: 10px;
+  object-fit: cover;
+  margin-bottom: 10px;
+}
+
+/* Buttons */
+.btn,
+.camera-btn {
+  padding: 10px 16px;
+  margin: 8px 5px;
+  font-size: 1rem;
+  font-weight: 600;
+  border: none;
+  border-radius: 8px;
+  background-color: #1e8f53;
+  color: white;
+  cursor: pointer;
+  transition: background 0.3s ease;
+}
+
+.btn:hover {
+  background-color: #166c3e;
+}
+
+.btn.danger {
+  background-color: #e74c3c;
+}
+
+.btn.danger:hover {
+  background-color: #c0392b;
+}
+
+.camera-btn {
+  padding: 12px 24px;
+  background: linear-gradient(45deg, #ff4b2b, #ff416c);
+  font-size: 18px;
+  border-radius: 10px;
+  transition: 0.3s;
+}
+
+.camera-btn:hover {
+  background: linear-gradient(45deg, #ff416c, #ff4b2b);
+}
+
+/* Controls Container */
+.camera-controls {
+  text-align: center;
+  margin: 20px 0 10px;
+}
+
+/* Prediction Result */
+#predictionResult {
+  font-size: 1rem;
+  margin-top: 10px;
+  font-weight: bold;
+  text-align: center;
+  color: #333;
+}
+
+/* Alert & Suggestion Lists */
+.card ul {
+  list-style: none;
+  padding-left: 0;
+  margin-top: 10px;
+}
+
+.card ul li {
+  background: #f0f0f0;
+  padding: 8px 10px;
+  margin-bottom: 6px;
+  border-radius: 6px;
+  color: #333;
+  font-size: 0.95rem;
+}
+
+.card ul li small {
+  color: #888;
+  font-size: 0.8rem;
+}
+
+/* Webcam Canvas */
+canvas {
+  display: block;
+  margin: 0 auto;
+  border-radius: 10px;
+  background: black;
+}
+#cameraStream, #poseCanvas {
+  width: 100%;
+  height: 240px;
+  border-radius: 10px;
+}
+
+#poseCanvas {
+  position: absolute;
+  left: 0;
+  top: 0;
+}
